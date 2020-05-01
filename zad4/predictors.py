@@ -57,18 +57,30 @@ class Predictor(ABC):
             for col in range(self.codes.width):
                 self.codes.new_pixel(
                     row, col, 
-                    self.get_prediction(row, col, get_red),
-                    self.get_prediction(row, col, get_green),
-                    self.get_prediction(row, col, get_blue)
+                    self._get_prediction(row, col, get_red),
+                    self._get_prediction(row, col, get_green),
+                    self._get_prediction(row, col, get_blue)
                 )
 
-    @abstractmethod
-    def get_prediction(self, row, column, color_extractor):
+    def _get_prediction(self, row, column, color_extractor):
         """Calculate and return prediction on the specific coordinates.
         
         -- row - y-coordinate
         -- column - x-coordinate
         -- color_extractor -- function to extract specific color ingredient value
+        """
+        n = color_extractor(self.n(row, column))
+        w = color_extractor(self.w(row, column))
+        nw = color_extractor(self.nw(row, column))
+        return color_extractor(self.original_pixel_map[row, column]) - self.get_prediction(n, w, nw)
+
+    @abstractmethod
+    def get_prediction(self, n, w, nw):
+        """Calculate and return predictor according to standard.
+        
+        -- n - pixel above the current
+        -- w - pixel on the left of the current
+        -- nw -- pixel on the up-left of the current
         """
         pass
 
@@ -86,45 +98,41 @@ class Predictor(ABC):
 
 
 class PredictorN(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        return color_extractor(self.original_pixel_map[row, column]) - color_extractor(self.n(row, column))
+    def get_prediction(self, n, w, nw):
+        return n
 
 
 class PredictorW(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        return color_extractor(self.original_pixel_map[row, column]) - color_extractor(self.w(row, column))
+    def get_prediction(self, n, w, nw):
+        return w
 
 
 class PredictorNW(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        return color_extractor(self.original_pixel_map[row, column]) - color_extractor(self.nw(row, column))
+    def get_prediction(self, n, w, nw):
+        return nw
 
 
 class PredictorNAddWSubNW(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        return color_extractor(self.original_pixel_map[row, column]) - (color_extractor(self.n(row, column)) + color_extractor(self.w(row, column)) - color_extractor(self.nw(row, column)))
+    def get_prediction(self, n, w, nw):
+        return n + w - nw
 
 
 class PredictorNAddHalfWSubNW(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        return color_extractor(self.original_pixel_map[row, column]) - (color_extractor(self.n(row, column)) + (color_extractor(self.w(row, column)) - color_extractor(self.nw(row, column)))//2)
+    def get_prediction(self, n, w, nw):
+        return n + (w - nw)//2
 
 
 class PredictorWAddHalfNSubNW(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        return color_extractor(self.original_pixel_map[row, column]) - (color_extractor(self.w(row, column)) + (color_extractor(self.n(row, column)) - color_extractor(self.nw(row, column)))//2)
+    def get_prediction(self, n, w, nw):
+        return w + (n - nw)//2
 
 
 class PredictorHalfNAddW(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        return color_extractor(self.original_pixel_map[row, column]) - (color_extractor(self.w(row, column)) + color_extractor(self.n(row, column)))//2
-
+    def get_prediction(self, n, w, nw):
+        return (w + n)//2
 
 class PredictorNew(Predictor):
-    def get_prediction(self, row, column, color_extractor):
-        n = color_extractor(self.n(row, column))
-        w = color_extractor(self.w(row, column))
-        nw = color_extractor(self.nw(row, column))
+    def get_prediction(self, n, w, nw):
         m = max(w, n)
         if nw >= m:
             return m

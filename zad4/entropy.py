@@ -40,12 +40,14 @@ class ColorEntropy:
         self.green_entropy = Entropy()
         self.blue_entropy = Entropy()
 
-    def new_value(self, value):
+    def new_value(self, pixel):
         """Update all entropies with value."""
-        self.color_entropy.new_value(value)
-        self.red_entropy.new_value(get_red(value))
-        self.green_entropy.new_value(get_green(value))
-        self.blue_entropy.new_value(get_blue(value))
+        self.color_entropy.new_value(pixel.red)
+        self.color_entropy.new_value(pixel.green)
+        self.color_entropy.new_value(pixel.blue)
+        self.red_entropy.new_value(pixel.red)
+        self.green_entropy.new_value(pixel.green)
+        self.blue_entropy.new_value(pixel.blue)
 
     def get_color(self):
         """Return entropy of full colors."""

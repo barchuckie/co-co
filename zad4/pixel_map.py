@@ -43,7 +43,7 @@ class PixelMap:
         -- idx - tuple of (row, col)
         """
         row, col = idx
-        if -1 < row < self.height or -1 < col < self.width:
+        if -1 < row < self.height and -1 < col < self.width:
             return self.pixels[row, col]
         return Pixel(0, 0, 0)
 
@@ -59,7 +59,7 @@ class PixelMap:
         assert row < self.height and col < self.width, f"Out of range: [{row}, {col}]"
         pixel = Pixel(red % 256, blue % 256, green % 256)
         self.pixels[row, col] = pixel
-        self.entropy.new_value(pixel.color)
+        self.entropy.new_value(pixel)
         
     @property
     def size(self):

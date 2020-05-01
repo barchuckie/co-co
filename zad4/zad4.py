@@ -1,3 +1,5 @@
+"""
+"""
 import argparse
 import math
 from tga_reader import TGAReader
@@ -10,7 +12,7 @@ def parse_arguments():
 
     arg_parser.add_argument(
         'input_file',
-        help='Plik do kompresowania'
+        help='Plik do zakodowania'
     )
 
     return arg_parser.parse_args()
@@ -22,6 +24,7 @@ def print_results(color, red, green, blue):
     print('Red:', red)
     print('Green:', green)
     print('Blue:', blue)
+    print('------------------------------')
 
 
 def print_entropies(entropy):
@@ -41,7 +44,7 @@ def calculate_predictors(original_pixel_map):
     entropies['(N+W)/2'] = PredictorHalfNAddW(original_pixel_map).codes.entropy
     entropies['NEW'] = PredictorNew(original_pixel_map).codes.entropy
     return entropies
-
+            
 
 def encode(pixel_map):
     """Encode pixels in the pixel map, look for the most optimal and print results."""
@@ -67,7 +70,13 @@ def encode(pixel_map):
             min_blue = (key, entropy.get_blue())
 
     print('BEST')
-    print_results(min_color[0], min_red[0], min_green[0], min_blue[0])
+    delimiter = '  '
+    print_results(
+        delimiter.join(map(str, min_color)), 
+        delimiter.join(map(str, min_red)), 
+        delimiter.join(map(str, min_green)), 
+        delimiter.join(map(str, min_blue))
+    )
 
 
 
@@ -75,6 +84,8 @@ def encode(pixel_map):
 def main():
     """Read file from the program rguments and perform coding."""
     args = parse_arguments()
+    print(args.input_file)
+    print('------------------------------')
     tga_reader = TGAReader(args.input_file)
     encode(tga_reader.pixel_map)
 

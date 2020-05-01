@@ -35,9 +35,12 @@ def read_image(file, height, width):
     -- width - width of the image in pixels
     """
     pixel_map = PixelMap(height, width)
-    for row in range(height):
+    for row in range(height-1, -1, -1):
         for col in range(width):
-            pixel_map.new_pixel(row, col, file.read(1)[0], file.read(1)[0], file.read(1)[0])
+            blue = file.read(1)[0]
+            green = file.read(1)[0]
+            red = file.read(1)[0]
+            pixel_map.new_pixel(row, col, red, green, blue)
     
     return pixel_map
 
@@ -59,5 +62,5 @@ class TGAReader:
             header = extract_header(file)
             assert header['id-length'] == header['color-map-length'] == 0, "ID or Color Map length > 0"
             assert header['pixel-depth'] == 24, "Pixel depth != 24 (3 bytes)"
-            pixel_map = read_image(file, header['width'], header['height'])
+            pixel_map = read_image(file, header['height'], header['width'])
         return header, pixel_map
